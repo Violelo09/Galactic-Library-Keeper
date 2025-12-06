@@ -1,87 +1,62 @@
-"""
-main.py → menú principal
-"""
+import csv
 
-from auth import inicio_sesion
-from visitors import (
-    registrar_visitante,
-    listar_visitantes,
-    buscar_visitante_por_id,
-    actualizar_estado,
-    eliminar_visitante,
-    mostrar_estadisticas
-)
-
-
-def mostrar_menu():
-    """Muestra el menú de opciones"""
-    print("\n" + "="*60)
-    print(" "*10 + "SISTEMA DE VISITANTES INTERGALÁCTICOS")
-    print("="*60)
-    print("  [1] Registrar nuevo visitante")
-    print("  [2] Listar todos los visitantes")
-    print("  [3] Buscar visitante por ID")
-    print("  [4] Actualizar estado de visitante")
-    print("  [5] Eliminar visitante")
-    print("  [6] Ver estadísticas del sistema")
-    print("  [7] Salir")
-    print("="*60)
-
-
-def menu_principal():
-    """
-    Controla el flujo principal del programa
-    Muestra el menú y ejecuta las opciones seleccionadas
-    """
-    while True:
-        mostrar_menu()
-        opcion = input("\nSelecciona una opción (1-7): ").strip()
+# Autenticacion de usuario
+def leer_usuario():
+    try:
+        admin_access = {}
         
-        if opcion == "1":
-            registrar_visitante()
-        elif opcion == "2":
-            listar_visitantes()
-        elif opcion == "3":
-            buscar_visitante_por_id()
-        elif opcion == "4":
-            actualizar_estado()
-        elif opcion == "5":
-            eliminar_visitante()
-        elif opcion == "6":
-            mostrar_estadisticas()
-        elif opcion == "7":
-            print("\n" + "="*60)
-            print(" "*15 + "¡HASTA LUEGO!")
-            print("  Gracias por usar el sistema TechLab")
-            print("="*60)
-            break
-        else:
-            print("\n✗ ERROR: Opción inválida. Por favor selecciona 1-7")
+        with open('admin_access.csv', "r", newline="",encoding="utf-8") as archivo:
+            lector = csv.DictReader(archivo)
+            for datos in lector:
+                print(datos) 
         
-        # Pausa para que el usuario vea el resultado
-        input("\nPresiona ENTER para continuar...")
-
-
-def main():
-    """
-    Función principal del programa
-    1. Autentica al usuario
-    2. Si es exitoso, muestra el menú principal
-    """
-    print("\n" + "="*60)
-    print(" "*15 + "SISTEMA TECHLAB")
-    print(" "*10 + "Gestión de Visitantes Intergalácticos")
-    print("="*60)
+        return admin_access
     
-    # Autenticación requerida
-    if inicio_sesion():
-        print("\nBienvenido al sistema")
-        menu_principal()
+    except FileNotFoundError:
+        print("Error: No se encontrado el archivo admin_access.csv")
+        return {}
+    except Exception as e:
+        print(f"Error al leer usuarios: {e}")
+        return {}
+
+
+# Validar credenciales
+def validar_credenciales(usuario, contrasena):
+    usuarios = leer_usuario()
+
+    if usuarioDelArchivoCSV == usuario and contrasenaDelArchivoCSV == contrasena:
+        return True
     else:
-        print("\nAcceso denegado")
-        print("El programa se cerrará por seguridad")
+        return False
 
 
-# Punto de entrada del programa (CORRECCIÓN: Faltaba llamar a main())
-if __name__ == "__main__":
-    main()
+# Inicio de sesion 
+def inicio_sesion():
+    intentos = 0
+    max_intentos = 3
+
+    print("\n" + "="*50)
+    print("INICIO DE SESIÓN")
+    print("="*50)
+    
+    while intentos < max_intentos:
+        usuario = input("Usuario: ")
+        contrasena = input("Contraseña: ")
+
+        if validar_credenciales(usuario, contrasena):
+            print("\nInicio de sesión exitoso!")
+            return True
+        else:
+            intentos += 1
+            intentos_restantes = max_intentos - intentos
+
+            if intentos_restantes > 0:
+                print(f"\nCredenciales incorrectas. Te quedan {intentos_restantes} intento(s).")
+            else:
+                print("\nCredenciales incorrectas. Se agotaron los intentos.")
+    
+    print("Cerrando el programa...")
+    return False
+
+
+inicio_sesion()
